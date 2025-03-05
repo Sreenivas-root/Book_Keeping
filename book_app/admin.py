@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Employee, Vendor, Customer, Invoice, PurchaseOrder
+from .models import Employee, Vendor, Customer
 
 # Register your models here.
 class EmployeeAdmin(admin.ModelAdmin):

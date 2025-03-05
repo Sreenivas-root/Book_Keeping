@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Balance Sheet</h1>
+{% if error %}
+    <p>{{ error }}</p>
+{% else %}
+    <p>As of {{ date }}</p>
+    <table>
+        <tr>
+            <th>Assets</th>
+            <th>Amount</th>
+            <th>Liabilities & Equity</th>
+            <th>Amount</th>
+        </tr>
+        <tr>
+            <td>Cash</td>
+            <td>${{ statement.assets.current.cash|floatformat:2 }}</td>
+            <td>Accounts Payable</td>
+            <td>${{ statement.liabilities.accounts_payable|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Accounts Receivable</td>
+            <td>${{ statement.assets.accounts_receivable|floatformat:2 }}</td>
+            <td>Notes Payable</td>
+            <td>${{ statement.liabilities.notes_payable|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Inventory</td>
+            <td>${{ statement.assets.inventory|floatformat:2 }}</td>
+            <td>Accruals</td>
+            <td>${{ statement.liabilities.accruals|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Assets</strong></td>
+            <td><strong>${{ statement.assets.total|floatformat:2 }}</strong></td>
+            <td><strong>Total Liabilities</strong></td>
+            <td><strong>${{ statement.liabilities.total|floatformat:2 }}</strong></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td><strong>Net Worth</strong></td>
+            <td><strong>${{ statement.net_worth|floatformat:2 }}</strong></td>
+        </tr>
+    </table>
+{% endif %}
+{% endblock %}

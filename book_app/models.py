@@ -36,13 +36,13 @@ class Customer(models.Model):
     zip = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
-class Invoice(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+# class Invoice(models.Model):
+#     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+#     date = models.DateField()
+#     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
-class PurchaseOrder(models.Model):
-    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
-    date = models.DateField()
-    quantity = models.IntegerField()
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+# class PurchaseOrder(models.Model):
+#     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
+#     date = models.DateField()
+#     quantity = models.IntegerField()
+#     total_amount = models.DecimalField(max_digits=10, decimal_places=2)

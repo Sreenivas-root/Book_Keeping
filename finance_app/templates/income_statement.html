@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Income Statement</h1>
+{% if error %}
+    <p>{{ error }}</p>
+{% else %}
+    <p>As of {{ date }}</p>
+    <table>
+        <tr>
+            <th>Sales</th>
+        </tr>
+        <tr>
+            <td>Sales</td>
+            <td>${{ statement.sales|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Cost of Goods Sold</td>
+            <td>${{ statement.costOfGoodsSold|floatformat:2 }}</td>
+        </tr>
+        
+        <tr style="border-top: 1px solid black;">
+            <td><strong>Gross Profit</strong></td>
+            <td><strong>${{ statement.grossProfit|floatformat:2 }}</strong></td>
+        </tr>
+        <tr>
+            <td>Payroll</td>
+            <td>${{ statement.operatingExpenses.payroll|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Payroll Withholding</td>
+            <td>${{ statement.operatingExpenses.payrollWitholding|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Rent</td>
+            <td>${{ statement.operatingExpenses.rent|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Bills</td>
+            <td>${{ statement.operatingExpenses.bills|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Miscellaneous</td>
+            <td>${{ statement.operatingExpenses.miscellaneous|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Expenses</strong></td>
+            <td>${{ statement.totalExpenses|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Other Income</td>
+            <td>${{ statement.otherIncome|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td><strong>Operating Income</strong></td>
+            <td><strong>${{ statement.operatingIncome|floatformat:2 }}</strong></td>
+        </tr>
+        <tr>
+            <td>Income Taxes</td>
+            <td>${{ statement.incomeTaxes|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td><strong>Net Income</strong></td>
+            <td><strong>${{ statement.netIncome|floatformat:2 }}</strong></td>
+        </tr>
+    </table>
+{% endif %}
+{% endblock %}
