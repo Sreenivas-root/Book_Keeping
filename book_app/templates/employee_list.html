@@ -1,0 +1,40 @@
+{% extends "master.html" %}
+{% block title %}Employees{% endblock %}
+
+
+{% block content %}
+
+<h1>Employees</h1>
+<table>
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Address 1</th>
+            <th>Address 2</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Zip</th>
+            <th>SSN</th>
+            <th>Withholdings</th>
+            <th>Salary</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for employee in employee_list %}
+        <tr>
+            <td>{{ employee.first_name }}</td>
+            <td>{{ employee.last_name }}</td>
+            <td>{{ employee.address1 }}</td>
+            <td>{{ employee.address2 }}</td>
+            <td>{{ employee.city }}</td>
+            <td>{{ employee.state }}</td>
+            <td>{{ employee.zip }}</td>
+            <td>{{ employee.ssn }}</td>
+            <td>{{ employee.witholdings }}</td>
+            <td>{{ employee.salary }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

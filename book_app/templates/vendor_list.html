@@ -1,0 +1,34 @@
+{% extends "master.html" %}
+{% block title %}Vendors{% endblock %}
+
+
+{% block content %}
+<table>
+    <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>Part</th>
+            <th>Price Per Unit</th>
+            <th>Address 1</th>
+            <th>Address 2</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Zip</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vendor in vendor_list %}
+        <tr>
+            <td>{{ vendor.company_name }}</td>
+            <td>{{ vendor.part }}</td>
+            <td>{{ vendor.price_per_unit }}</td>
+            <td>{{ vendor.address1 }}</td>
+            <td>{{ vendor.address2 }}</td>
+            <td>{{ vendor.city }}</td>
+            <td>{{ vendor.state }}</td>
+            <td>{{ vendor.zip }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
