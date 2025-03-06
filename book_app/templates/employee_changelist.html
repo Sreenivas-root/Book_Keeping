@@ -1,0 +1,18 @@
+{% extends 'admin/change_list.html' %}
+
+{% block object-tools %}
+<script>
+    function openEmployeePopup() {
+        window.open('{% url "employee_selection_popup" %}', 'EmployeeSelection', 
+                    'width=800,height=600,resizable=yes,scrollbars=yes');
+    }
+    </script>
+    <div>
+        <!-- <form action="custom_action/" method="POST">
+            {% csrf_token %} -->
+            <button type="submit" onclick="return openEmployeePopup();">Pay Employee</button>
+        <!-- </form> -->
+    </div>
+    <br />
+    {{ block.super }}
+{% endblock %}

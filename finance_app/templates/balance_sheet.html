@@ -5,6 +5,19 @@
 {% if error %}
     <p>{{ error }}</p>
 {% else %}
+<style>
+    table {
+        width: 50%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 5px;
+        text-align: left;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
     <p>As of {{ date }}</p>
     <table>
         <tr>
@@ -17,20 +30,55 @@
             <td>Cash</td>
             <td>${{ statement.assets.current.cash|floatformat:2 }}</td>
             <td>Accounts Payable</td>
-            <td>${{ statement.liabilities.accounts_payable|floatformat:2 }}</td>
+            <td>${{ statement.liabilities.current.accountsPayable|floatformat:2 }}</td>
         </tr>
         <tr>
             <td>Accounts Receivable</td>
-            <td>${{ statement.assets.accounts_receivable|floatformat:2 }}</td>
+            <td>${{ statement.assets.current.accountsReceivable|floatformat:2 }}</td>
             <td>Notes Payable</td>
-            <td>${{ statement.liabilities.notes_payable|floatformat:2 }}</td>
+            <td>${{ statement.liabilities.current.notesPayable|floatformat:2 }}</td>
         </tr>
         <tr>
             <td>Inventory</td>
-            <td>${{ statement.assets.inventory|floatformat:2 }}</td>
+            <td>${{ statement.assets.current.inventory|floatformat:2 }}</td>
             <td>Accruals</td>
-            <td>${{ statement.liabilities.accruals|floatformat:2 }}</td>
+            <td>${{ statement.liabilities.current.accruals|floatformat:2 }}</td>
         </tr>
+        <tr>
+            <td><strong>Total Current Assets</strong></td>
+            <td>${{ statement.assets.current.total|floatformat:2 }}</td>
+            <td><strong>Total Current Liabilities</strong></td>
+            <td>${{ statement.liabilities.current.total|floatformat:2 }}</td>
+        </tr>
+        <tr><td colspan="4"><br></td></tr>
+        <tr>
+            <td>Land</td>
+            <td>${{ statement.assets.fixed.land|floatformat:2 }}</td>
+            <td>Mortgage</td>
+            <td>${{ statement.liabilities.longTerm.mortgage|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Building</td>
+            <td>${{ statement.assets.fixed.building|floatformat:2 }}</td>
+            
+        </tr>
+        <tr>
+            <td>Equipment</td>
+            <td>${{ statement.assets.fixed.equipment|floatformat:2 }}</td>
+            
+        </tr>
+        <tr>
+            <td>Furniture</td>
+            <td>${{ statement.assets.fixed.furniture|floatformat:2 }}</td>
+            
+        </tr>
+        <tr>
+            <td><strong>Total Fixed Assets</strong></td>
+            <td>${{ statement.assets.fixed.total|floatformat:2 }}</td>
+            <td><strong>Total Long Term Debt</strong></td>
+            <td>${{ statement.liabilities.longTerm.total|floatformat:2 }}</td>
+        </tr>
+        <tr><td colspan="4"><br></td></tr>
         <tr>
             <td><strong>Total Assets</strong></td>
             <td><strong>${{ statement.assets.total|floatformat:2 }}</strong></td>
@@ -41,7 +89,7 @@
             <td></td>
             <td></td>
             <td><strong>Net Worth</strong></td>
-            <td><strong>${{ statement.net_worth|floatformat:2 }}</strong></td>
+            <td><strong>${{ statement.netWorth|floatformat:2 }}</strong></td>
         </tr>
     </table>
 {% endif %}

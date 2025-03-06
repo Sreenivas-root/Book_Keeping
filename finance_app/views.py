@@ -21,6 +21,15 @@ def income_statement_view(request):
 def balance_sheet_view(request):
     try:
         latest_balance_sheet = FinancialStatement.objects.filter(statement_type='balance').latest('date')
+        
+        latest_balance_sheet.data['assets']['current']['total'] = sum(latest_balance_sheet.data['assets']['current'].values())
+        latest_balance_sheet.data['assets']['fixed']['total'] = sum(latest_balance_sheet.data['assets']['fixed'].values())
+        latest_balance_sheet.data['liabilities']['current']['total'] = sum(latest_balance_sheet.data['liabilities']['current'].values())
+        latest_balance_sheet.data['liabilities']['longTerm']['total'] = sum(latest_balance_sheet.data['liabilities']['longTerm'].values())
+        
+        latest_balance_sheet.data['assets']['total'] = latest_balance_sheet.data['assets']['current']['total'] + latest_balance_sheet.data['assets']['fixed']['total']
+        latest_balance_sheet.data['liabilities']['total'] = latest_balance_sheet.data['liabilities']['current']['total'] + latest_balance_sheet.data['liabilities']['longTerm']['total']
+        latest_balance_sheet.data['netWorth'] = latest_balance_sheet.data['assets']['total'] - latest_balance_sheet.data['liabilities']['total']
         context = {
             'statement': latest_balance_sheet.data,
             'date': latest_balance_sheet.date

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from .models import Employee, Vendor, Customer
+from django.contrib.admin.views.decorators import staff_member_required
 
 
 def main(request):
@@ -32,17 +33,7 @@ def customers(request):
   }
   return HttpResponse(template.render(context, request))
 
-
-# Create your views here.
-
-# from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-# from .models import Employee, Vendor, Customer, Invoice, PurchaseOrder
-
-# class EmployeeListView(ListView):
-#     model = Employee
-
-# class EmployeeCreateView(CreateView):
-#     model = Employee
-#     fields = ['name', 'salary']
-
-# Similar views for Vendor, Customer, Invoice, and PurchaseOrder
+@staff_member_required
+def employee_selection_popup(request):
+    employees = Employee.objects.all()
+    return render(request, 'pay_employee.html', {'employees': employees})

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Employee</title>
+</head>
+<body>
+    <h2>Select an Employee</h2>
+    <select id="employeeSelect">
+        {% for employee in employees %}
+            <option value="{{ employee.id }}">{{ employee.first_name }}</option>
+        {% endfor %}
+    </select>
+    <button onclick="selectEmployee()">Select</button>
+
+    <script>
+    function selectEmployee() {
+        var select = document.getElementById('employeeSelect');
+        var employeeId = select.value;
+        var employeeName = select.options[select.selectedIndex].text;
+        window.opener.handleEmployeeSelection(employeeId, employeeName);
+        window.close();
+    }
+    </script>
+</body>
+</html>
