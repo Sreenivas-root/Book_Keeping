@@ -1,5 +1,12 @@
-from django.shortcuts import render
-from .models import Account, FinancialStatement
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from .models import Account, FinancialStatement, PayrollPayment
+from book_app.models import Employee
+import logging
+from decimal import Decimal
+from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 def income_statement_view(request):
     try:
@@ -37,3 +44,88 @@ def balance_sheet_view(request):
     except FinancialStatement.DoesNotExist:
         context = {'error': 'No balance sheet available'}
     return render(request, 'balance_sheet.html', context)
+
+
+def financial_statement_history_view(request):
+    historical_records = FinancialStatement.history.all()
+    context = {
+        'historical_records': historical_records
+    }
+    return render(request, 'financial_statement_history.html', context)
+
+
+def decimal_to_float(data):
+    if isinstance(data, dict):
+        return {k: decimal_to_float(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [decimal_to_float(i) for i in data]
+    elif isinstance(data, Decimal):
+        return float(data)
+    return data
+
+def pay_employee(request):
+    if request.method == 'POST':
+        employee_id = request.POST.get('employee')
+        logger.debug(f'Employee ID: {employee_id}')
+        if employee_id:
+            try:
+                employee = Employee.objects.get(id=employee_id)
+                salary = employee.salary
+                logger.debug(f'Employee salary: {salary}')
+                # Calculate tax values (example rates)
+                federal_tax_rate = Decimal('0.10')
+                state_tax_rate = Decimal('0.05')
+                social_security_rate = Decimal('0.062')
+                medicare_rate = Decimal('0.0145')
+
+                federal_tax = salary * federal_tax_rate
+                logger.debug(f'Federal tax: {federal_tax}')
+                state_tax = salary * state_tax_rate
+                logger.debug(f'State tax: {state_tax}')
+                social_security = salary * social_security_rate
+                logger.debug(f'Social security: {social_security}')
+                medicare = salary * medicare_rate
+                logger.debug(f'Medicare: {medicare}')
+                net_pay = salary - (federal_tax + state_tax + social_security + medicare)
+                logger.debug(f'Net pay: {net_pay}')
+
+                # Create a payroll payment record
+                payroll_payment = PayrollPayment(
+                    employee=employee,
+                    salary=float(salary),
+                    federal_tax=float(federal_tax),
+                    state_tax=float(state_tax),
+                    social_security=float(social_security),
+                    medicare=float(medicare),
+                    net_pay=float(net_pay),
+                    date=timezone.now()
+                )
+                payroll_payment.save()
+
+                # Update the income statement
+                latest_income_statement = FinancialStatement.objects.filter(statement_type='income').latest('date')
+                latest_income_statement.data['operatingExpenses']['payroll'] += float(salary) - float(net_pay)
+                latest_income_statement.data['operatingExpenses']['payrollWitholding'] += float(federal_tax + state_tax + social_security + medicare)
+                latest_income_statement.data = decimal_to_float(latest_income_statement.data)
+                latest_income_statement.save()
+
+                # Update the balance sheet
+                latest_balance_sheet = FinancialStatement.objects.filter(statement_type='balance').latest('date')
+                latest_balance_sheet.data['assets']['current']['cash'] -= float(salary)
+                latest_balance_sheet.data = decimal_to_float(latest_balance_sheet.data)
+                latest_balance_sheet.save()
+
+                return JsonResponse({'success': True})
+
+            except Employee.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Employee not found'})
+            except FinancialStatement.DoesNotExist:
+                return JsonResponse({'success': False, 'error': 'Financial statement not found'})
+            except Exception as e:
+                logger.error(f'Unexpected error: {e}')
+                return JsonResponse({'success': False, 'error': 'An unexpected error occurred'})
+
+        return JsonResponse({'success': False, 'error': 'Invalid employee ID'})
+
+    # employees = Employee.objects.all()
+    # return render(request, 'pay_employee.html', {'employees': employees})

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Financial Statement History</title>
+</head>
+<body>
+    <h1>Financial Statement History</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Statement Type</th>
+                <th>Data</th>
+                <th>History Date</th>
+                <th>History Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in historical_records %}
+            <tr>
+                <td>{{ record.id }}</td>
+                <td>{{ record.date }}</td>
+                <td>{{ record.statement_type }}</td>
+                <td>{{ record.data }}</td>
+                <td>{{ record.history_date }}</td>
+                <td>{{ record.history_type }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
