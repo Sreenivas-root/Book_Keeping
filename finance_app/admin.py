@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Account, FinancialStatement, InventoryItem, PurchaseOrder, Invoice, PayrollPayment, InventoryCount
+from .models import FinancialStatement, InventoryItem, PurchaseOrder, Invoice, PayrollPayment, InventoryCount
 
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('customer', 'date', 'quantity', 'price', 'total_amount')
-    ordering = ('customer', 'date', 'quantity')
+    list_display = ('date', 'customer', 'quantity', 'price', 'total_amount')
+    ordering = ('-date', 'customer', 'quantity')
 
     def price(self, obj):
         return obj.price
@@ -16,7 +16,7 @@ class InvoiceAdmin(admin.ModelAdmin):
 
 class PurchaseOrderAdmin(admin.ModelAdmin):
     list_display = ('date', 'supplier', 'inventory_item', 'quantity', 'price_per_unit', 'total_amount')
-    ordering = ('date', 'inventory_item', 'quantity')
+    ordering = ('-date', 'inventory_item', 'quantity')
 
     def price_per_unit(self, obj):
         return obj.price_per_unit
@@ -50,12 +50,19 @@ class InventoryItemAdmin(admin.ModelAdmin):
     price_per_unit.admin_order_field = 'price_per_unit'
     value.admin_order_field = 'value'
 
+
+class PayrollPaymentAdmin(admin.ModelAdmin):
+    list_display = ('date', 'employee', 'salary', 'federal_tax', 'state_tax', 'social_security', 'medicare', 'deductions', 'net_pay')
+    ordering = ('-date', 'employee')
+
+    def deductions(self, obj):
+        return obj.deductions
+
 # Register your models here.
-admin.site.register(Account)
 admin.site.register(FinancialStatement)
 admin.site.register(InventoryItem, InventoryItemAdmin)
 admin.site.register(PurchaseOrder, PurchaseOrderAdmin)
 admin.site.register(Invoice, InvoiceAdmin)
-admin.site.register(PayrollPayment)
+admin.site.register(PayrollPayment, PayrollPaymentAdmin)
 admin.site.register(InventoryCount, InventoryCountAdmin)
 

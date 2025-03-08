@@ -5,23 +5,14 @@ from django.utils import timezone
 from book_app.models import Employee, Vendor, Customer
 from simple_history.models import HistoricalRecords
 from decimal import Decimal
-
-class Account(models.Model):
-    name = models.CharField(max_length=100)
-    account_type = models.CharField(max_length=20, choices=[
-        ('asset', 'Asset'),
-        ('liability', 'Liability'),
-        ('equity', 'Equity'),
-        ('revenue', 'Revenue'),
-        ('expense', 'Expense')
-    ])
-    balance = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    history = HistoricalRecords()
+from django.utils.timezone import now
+from datetime import timedelta
+from celery import shared_task
 
 class InventoryItem(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT)
     quantity = models.IntegerField(default=0)
-    reorder_point = models.IntegerField(default=0)
+    reorder_point = models.BooleanField(default=False)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -59,6 +50,8 @@ class PurchaseOrder(models.Model):
         InventoryItem.objects.filter(pk=self.inventory_item.pk).update(quantity=self.inventory_item.quantity + self.quantity)
         balance_sheet.save()
         super().save(*args, **kwargs)
+        # Schedule the update of accountsPayable and cash after 30 days
+        update_accounts_payable.apply_async((self.pk,), eta=now() + timedelta(days=30))
 
 class Invoice(models.Model):
     customer = models.ForeignKey('book_app.Customer', on_delete=models.CASCADE, related_name='finance_invoices')
@@ -91,6 +84,8 @@ class Invoice(models.Model):
         income_statement.save()
         balance_sheet.save()
         super().save(*args, **kwargs)
+        # Schedule the update of accountsReceivable and cash after 30 days
+        update_accounts_receivable_and_cash.apply_async((self.pk,), eta=now() + timedelta(days=30))
 
 class InventoryCount(models.Model):
     date = models.DateField(default=timezone.now)
@@ -108,6 +103,10 @@ class PayrollPayment(models.Model):
     net_pay = models.DecimalField(max_digits=15, decimal_places=2)
     history = HistoricalRecords()
 
+    @property
+    def deductions(self):
+        return self.federal_tax + self.state_tax + self.social_security + self.medicare
+
 class FinancialStatement(models.Model):
     date = models.DateField(default=timezone.now)
     statement_type = models.CharField(max_length=20, choices=[
@@ -119,3 +118,26 @@ class FinancialStatement(models.Model):
 
     def __str__(self):
         return self.statement_type == 'income' and 'Income Statement' or 'Balance Sheet'
+
+@shared_task
+def update_accounts_receivable_and_cash(invoice_id):
+    try:
+        invoice = Invoice.objects.get(pk=invoice_id)
+        balance_sheet = FinancialStatement.objects.filter(statement_type='balance').latest('date')
+        balance_sheet.data['assets']['current']['accountsReceivable'] -= float(invoice.total_amount)
+        balance_sheet.data['assets']['current']['cash'] += float(invoice.total_amount)
+        balance_sheet.save()
+    except Invoice.DoesNotExist:
+        pass
+
+
+@shared_task
+def update_accounts_payable(purchase_order_id):
+    try:
+        purchase_order = PurchaseOrder.objects.get(pk=purchase_order_id)
+        balance_sheet = FinancialStatement.objects.filter(statement_type='balance').latest('date')
+        balance_sheet.data['liabilities']['current']['accountsPayable'] -= float(purchase_order.total_amount)
+        balance_sheet.data['assets']['current']['cash'] -= float(purchase_order.total_amount)
+        balance_sheet.save()
+    except PurchaseOrder.DoesNotExist:
+        pass

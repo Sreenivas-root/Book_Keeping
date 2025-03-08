@@ -1,0 +1,48 @@
+{% extends "master.html" %}
+{% block title %}Pay Employee{% endblock %}
+
+{% block content %}
+<h2>Select an Employee to Pay</h2>
+<p id="error" style="color: red;"></p>
+<p id="success" style="color: green;"></p>
+<form id="payForm" action="/pay_employee/" method="POST">
+    {% csrf_token %}
+    <select id="employee" name="employee">
+        {% for employee in employees %}
+            <option value="{{ employee.id }}">{{ employee.first_name }} {{ employee.last_name }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Pay</button>
+</form>
+
+<script>
+document.getElementById('payForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const csrfToken = formData.get('csrfmiddlewaretoken');
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('success').textContent = 'Payment successful!';
+            document.getElementById('error').textContent = '';
+        } else {
+            document.getElementById('error').textContent = data.error || 'Payment failed!';
+            document.getElementById('success').textContent = '';
+        }
+    })
+    .catch(error => {
+        document.getElementById('error').textContent = 'An unexpected error occurred!';
+        document.getElementById('success').textContent = '';
+    });
+});
+</script>
+{% endblock %}

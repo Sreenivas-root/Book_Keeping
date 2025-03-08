@@ -8,6 +8,6 @@ urlpatterns = [
     path('employees/', views.employees, name='employee-list'),
     path('vendors/', views.vendors, name='vendor-list'),
     path('customers/', views.customers, name='customer-list'),
+    path('pay-employee/', views.pay_employee, name='pay_employee'),
     path('admin/employee-selection-popup/', views.employee_selection_popup, name='employee_selection_popup'),
-    # path('employees/add/', views.EmployeeCreateView.as_view(), name='employee-add'),
 ]

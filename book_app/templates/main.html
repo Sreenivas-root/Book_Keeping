@@ -2,9 +2,51 @@
 {% block title %}Main{% endblock %}
 
 {% block content %}
-<h1>Main</h1>
+<h1>TE 566 Project - Sreenivas</h1>
 <p>Welcome to the main page!</p>
-<a href="/employees">Employees</a>
-<a href="/vendors">Vendors</a>
-<a href="/customers">Customers</a>
+
+<nav>
+    <ul>
+        <li><a href="/admin/book_app/employee" class="button">Employees</a></li>
+        <li><a href="/admin/book_app/customer" class="button">Customers</a></li>
+        <li><a href="/admin/book_app/vendor" class="button">Vendors</a></li>
+    </ul>
+    <ul>
+        <li><a href="/pay-employee/" class="button">Pay Employee</a></li>
+        <li><a href="/admin/finance_app/payrollpayment" class="button">Payroll History</a></li>
+    </ul>
+    <ul>
+        <li><a href="/admin/finance_app/inventoryitem" class="button">Inventory Items</a></li>
+    </ul>
+    <ul>
+        <li><a href="/admin/finance_app/invoice" class="button">Invoices</a></li>
+    </ul>
+    <ul>
+        <li><a href="/income-statement" class="button">Income Statement</a></li>
+        <li><a href="/balance-sheet" class="button">Balance Sheet</a></li>
+    </ul>
+</nav>
+
+<style>
+    nav ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    nav ul li {
+        display: inline;
+        margin-right: 10px;
+    }
+    .button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 16px;
+        color: #fff;
+        background-color: #007BFF;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+    .button:hover {
+        background-color: #0056b3;
+    }
+</style>
 {% endblock %}

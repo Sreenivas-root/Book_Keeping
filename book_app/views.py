@@ -37,3 +37,7 @@ def customers(request):
 def employee_selection_popup(request):
     employees = Employee.objects.all()
     return render(request, 'pay_employee.html', {'employees': employees})
+
+def pay_employee(request):
+    employees = Employee.objects.all()
+    return render(request, 'pay_employee_direct.html', {'employees': employees})

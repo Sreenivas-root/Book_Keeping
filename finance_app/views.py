@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Account, FinancialStatement, PayrollPayment
+from .models import FinancialStatement, PayrollPayment
 from book_app.models import Employee
 import logging
 from decimal import Decimal
+from datetime import date
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ def income_statement_view(request):
         
         context = {
             'statement': latest_income_statement.data,
-            'date': latest_income_statement.date
+            'date': date.today()
         }
     except FinancialStatement.DoesNotExist:
         context = {'error': 'No income statement available'}
@@ -39,7 +40,7 @@ def balance_sheet_view(request):
         latest_balance_sheet.data['netWorth'] = latest_balance_sheet.data['assets']['total'] - latest_balance_sheet.data['liabilities']['total']
         context = {
             'statement': latest_balance_sheet.data,
-            'date': latest_balance_sheet.date
+            'date': date.today()
         }
     except FinancialStatement.DoesNotExist:
         context = {'error': 'No balance sheet available'}
@@ -66,12 +67,12 @@ def decimal_to_float(data):
 def pay_employee(request):
     if request.method == 'POST':
         employee_id = request.POST.get('employee')
-        logger.debug(f'Employee ID: {employee_id}')
+
         if employee_id:
             try:
                 employee = Employee.objects.get(id=employee_id)
                 salary = employee.salary
-                logger.debug(f'Employee salary: {salary}')
+
                 # Calculate tax values (example rates)
                 federal_tax_rate = Decimal('0.10')
                 state_tax_rate = Decimal('0.05')
@@ -79,15 +80,10 @@ def pay_employee(request):
                 medicare_rate = Decimal('0.0145')
 
                 federal_tax = salary * federal_tax_rate
-                logger.debug(f'Federal tax: {federal_tax}')
                 state_tax = salary * state_tax_rate
-                logger.debug(f'State tax: {state_tax}')
                 social_security = salary * social_security_rate
-                logger.debug(f'Social security: {social_security}')
                 medicare = salary * medicare_rate
-                logger.debug(f'Medicare: {medicare}')
                 net_pay = salary - (federal_tax + state_tax + social_security + medicare)
-                logger.debug(f'Net pay: {net_pay}')
 
                 # Create a payroll payment record
                 payroll_payment = PayrollPayment(
@@ -104,7 +100,7 @@ def pay_employee(request):
 
                 # Update the income statement
                 latest_income_statement = FinancialStatement.objects.filter(statement_type='income').latest('date')
-                latest_income_statement.data['operatingExpenses']['payroll'] += float(salary) - float(net_pay)
+                latest_income_statement.data['operatingExpenses']['payroll'] += float(net_pay)
                 latest_income_statement.data['operatingExpenses']['payrollWitholding'] += float(federal_tax + state_tax + social_security + medicare)
                 latest_income_statement.data = decimal_to_float(latest_income_statement.data)
                 latest_income_statement.save()
