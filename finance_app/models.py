@@ -40,16 +40,25 @@ class InventoryItem(models.Model):
         return self.price_per_unit * self.quantity if self.price_per_unit else 0
 
 class PurchaseOrder(models.Model):
-    vendor = models.ForeignKey(Vendor, on_delete=models.PROTECT)
     date = models.DateField(default=timezone.now)
-    total_amount = models.DecimalField(max_digits=15, decimal_places=2)
+    inventory_item = models.ForeignKey(InventoryItem, on_delete=models.PROTECT)
+    quantity = models.IntegerField(default=0)
     history = HistoricalRecords()
 
-class PurchaseOrderItem(models.Model):
-    purchase_order = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
-    inventory_item = models.ForeignKey(InventoryItem, on_delete=models.PROTECT)
-    quantity = models.IntegerField()
-    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2)
+    @property
+    def price_per_unit(self):
+        return self.inventory_item.price_per_unit if self.inventory_item else None
+    
+    @property
+    def total_amount(self):
+        return self.price_per_unit * self.quantity if self.price_per_unit else 0
+    
+    def save(self, *args, **kwargs):
+        balance_sheet = FinancialStatement.objects.filter(statement_type='balance').latest('date')
+        balance_sheet.data['liabilities']['current']['accountsPayable'] += float(self.total_amount)
+        InventoryItem.objects.filter(pk=self.inventory_item.pk).update(quantity=self.inventory_item.quantity + self.quantity)
+        balance_sheet.save()
+        super().save(*args, **kwargs)
 
 class Invoice(models.Model):
     customer = models.ForeignKey('book_app.Customer', on_delete=models.CASCADE, related_name='finance_invoices')
