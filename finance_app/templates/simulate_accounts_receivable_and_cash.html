@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Balance Sheet</h1>
+{% if error %}
+    <p>{{ error }}</p>
+{% else %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simulate Accounts Receivable and Cash</title>
+</head>
+<body>
+    <h1>Simulation Results for Accounts Receivable and Cash</h1>
+    <table>
+        <tr>
+            <th>Assets</th>
+            <th>Amount</th>
+            <th>Liabilities & Equity</th>
+            <th>Amount</th>
+        </tr>
+        <tr>
+            <td>Cash</td>
+            <td>${{ simulation_results.assets.current.cash|floatformat:2 }}</td>
+            <td>Accounts Payable</td>
+            <td>${{ simulation_results.liabilities.current.accountsPayable|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Accounts Receivable</td>
+            <td>${{ simulation_results.assets.current.accountsReceivable|floatformat:2 }}</td>
+            <td>Notes Payable</td>
+            <td>${{ simulation_results.liabilities.current.notesPayable|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Inventory</td>
+            <td>${{ simulation_results.assets.current.inventory|floatformat:2 }}</td>
+            <td>Accruals</td>
+            <td>${{ simulation_results.liabilities.current.accruals|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Current Assets</strong></td>
+            <td>${{ simulation_results.assets.current.total|floatformat:2 }}</td>
+            <td><strong>Total Current Liabilities</strong></td>
+            <td>${{ simulation_results.liabilities.current.total|floatformat:2 }}</td>
+        </tr>
+        <tr><td colspan="4"><br></td></tr>
+        <tr>
+            <td>Land</td>
+            <td>${{ simulation_results.assets.fixed.land|floatformat:2 }}</td>
+            <td>Mortgage</td>
+            <td>${{ simulation_results.liabilities.longTerm.mortgage|floatformat:2 }}</td>
+        </tr>
+        <tr>
+            <td>Building</td>
+            <td>${{ simulation_results.assets.fixed.building|floatformat:2 }}</td>
+            
+        </tr>
+        <tr>
+            <td>Equipment</td>
+            <td>${{ simulation_results.assets.fixed.equipment|floatformat:2 }}</td>
+            
+        </tr>
+        <tr>
+            <td>Furniture</td>
+            <td>${{ simulation_results.assets.fixed.furniture|floatformat:2 }}</td>
+            
+        </tr>
+        <tr>
+            <td><strong>Total Fixed Assets</strong></td>
+            <td>${{ simulation_results.assets.fixed.total|floatformat:2 }}</td>
+            <td><strong>Total Long Term Debt</strong></td>
+            <td>${{ simulation_results.liabilities.longTerm.total|floatformat:2 }}</td>
+        </tr>
+        <tr><td colspan="4"><br></td></tr>
+        <tr>
+            <td><strong>Total Assets</strong></td>
+            <td><strong>${{ simulation_results.assets.total|floatformat:2 }}</strong></td>
+            <td><strong>Total Liabilities</strong></td>
+            <td><strong>${{ simulation_results.liabilities.total|floatformat:2 }}</strong></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td><strong>Net Worth</strong></td>
+            <td><strong>${{ simulation_results.netWorth|floatformat:2 }}</strong></td>
+        </tr>
+    </table>
+    <button onclick="window.location.href='{% url 'simulation_list' %}'">Back to Simulation List</button>
+    <!-- <form action="/balance-sheet/" method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="simulation_results" value="{{ simulation_results }}">
+        <button type="submit">View Balance Sheet</button>
+    </form> -->
+</body>
+</html>
+
+{% endif %}
+{% endblock %} 

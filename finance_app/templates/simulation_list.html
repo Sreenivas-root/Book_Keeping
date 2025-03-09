@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Simulation List</h1>
+{% if error %}
+    <p>{{ error }}</p>
+{% else %}
+
+
+
+    <h2>Invoices</h2>
+    <ul>
+        {% for invoice in invoices %}
+        <li>
+            Invoice ID: {{ invoice.id }} - Customer: {{ invoice.customer.name }} - Amount: {{ invoice.total_amount }}
+            <button onclick="window.location.href='{% url 'simulate_accounts_receivable_and_cash' invoice.id %}'">Simulate Accounts Receivable and Cash</button>
+        </li>
+        {% endfor %}
+    </ul>
+    <h2>Purchase Orders</h2>
+    <ul>
+        {% for po in purchase_orders %}
+        <li>
+            Purchase Order ID: {{ po.id }} - Vendor: {{ po.inventory_item.vendor.name }} - Amount: {{ po.total_amount }}
+            <button onclick="window.location.href='{% url 'simulate_accounts_payable' po.id %}'">Simulate Accounts Payable</button>
+        </li>
+        {% endfor %}
+    </ul>
+
+
+{% endif %}
+{% endblock %}

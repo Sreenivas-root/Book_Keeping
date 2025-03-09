@@ -51,7 +51,7 @@ class PurchaseOrder(models.Model):
         balance_sheet.save()
         super().save(*args, **kwargs)
         # Schedule the update of accountsPayable and cash after 30 days
-        update_accounts_payable.apply_async((self.pk,), eta=now() + timedelta(days=30))
+        # update_accounts_payable.apply_async((self.pk,), eta=now() + timedelta(days=30))
 
 class Invoice(models.Model):
     customer = models.ForeignKey('book_app.Customer', on_delete=models.CASCADE, related_name='finance_invoices')
@@ -85,7 +85,7 @@ class Invoice(models.Model):
         balance_sheet.save()
         super().save(*args, **kwargs)
         # Schedule the update of accountsReceivable and cash after 30 days
-        update_accounts_receivable_and_cash.apply_async((self.pk,), eta=now() + timedelta(days=30))
+        # update_accounts_receivable_and_cash.apply_async((self.pk,), eta=now() + timedelta(days=30))
 
 class InventoryCount(models.Model):
     date = models.DateField(default=timezone.now)
@@ -139,5 +139,48 @@ def update_accounts_payable(purchase_order_id):
         balance_sheet.data['liabilities']['current']['accountsPayable'] -= float(purchase_order.total_amount)
         balance_sheet.data['assets']['current']['cash'] -= float(purchase_order.total_amount)
         balance_sheet.save()
+    except PurchaseOrder.DoesNotExist:
+        pass
+
+@shared_task
+def simulate_update_accounts_receivable_and_cash(invoice_id):
+    try:
+        invoice = Invoice.objects.get(pk=invoice_id)
+        balance_sheet = FinancialStatement.objects.filter(statement_type='balance').latest('date')
+        simulated_data = balance_sheet.data.copy()
+        simulated_data['assets']['current']['accountsReceivable'] -= float(invoice.total_amount)
+        simulated_data['assets']['current']['cash'] += float(invoice.total_amount)
+        
+
+        simulated_data['assets']['current']['total'] = sum(simulated_data['assets']['current'].values())
+        simulated_data['assets']['fixed']['total'] = sum(simulated_data['assets']['fixed'].values())
+        simulated_data['liabilities']['current']['total'] = sum(simulated_data['liabilities']['current'].values())
+        simulated_data['liabilities']['longTerm']['total'] = sum(simulated_data['liabilities']['longTerm'].values())
+        
+        simulated_data['assets']['total'] = simulated_data['assets']['current']['total'] + simulated_data['assets']['fixed']['total']
+        simulated_data['liabilities']['total'] = simulated_data['liabilities']['current']['total'] + simulated_data['liabilities']['longTerm']['total']
+        simulated_data['netWorth'] = simulated_data['assets']['total'] - simulated_data['liabilities']['total']
+        return simulated_data
+    except Invoice.DoesNotExist:
+        pass
+
+@shared_task
+def simulate_update_accounts_payable(purchase_order_id):
+    try:
+        purchase_order = PurchaseOrder.objects.get(pk=purchase_order_id)
+        balance_sheet = FinancialStatement.objects.filter(statement_type='balance').latest('date')
+        simulated_data = balance_sheet.data.copy()
+        simulated_data['liabilities']['current']['accountsPayable'] -= float(purchase_order.total_amount)
+        simulated_data['assets']['current']['cash'] -= float(purchase_order.total_amount)
+        
+        simulated_data['assets']['current']['total'] = sum(simulated_data['assets']['current'].values())
+        simulated_data['assets']['fixed']['total'] = sum(simulated_data['assets']['fixed'].values())
+        simulated_data['liabilities']['current']['total'] = sum(simulated_data['liabilities']['current'].values())
+        simulated_data['liabilities']['longTerm']['total'] = sum(simulated_data['liabilities']['longTerm'].values())
+        
+        simulated_data['assets']['total'] = simulated_data['assets']['current']['total'] + simulated_data['assets']['fixed']['total']
+        simulated_data['liabilities']['total'] = simulated_data['liabilities']['current']['total'] + simulated_data['liabilities']['longTerm']['total']
+        simulated_data['netWorth'] = simulated_data['assets']['total'] - simulated_data['liabilities']['total']
+        return simulated_data
     except PurchaseOrder.DoesNotExist:
         pass

@@ -6,6 +6,7 @@ import logging
 from decimal import Decimal
 from datetime import date
 from django.utils import timezone
+from .models import simulate_update_accounts_receivable_and_cash, simulate_update_accounts_payable, Invoice, PurchaseOrder
 
 logger = logging.getLogger(__name__)
 
@@ -125,3 +126,20 @@ def pay_employee(request):
 
     # employees = Employee.objects.all()
     # return render(request, 'pay_employee.html', {'employees': employees})
+
+def simulate_accounts_receivable_and_cash_view(request, invoice_id):
+    data = simulate_update_accounts_receivable_and_cash(invoice_id)
+    return render(request, 'simulate_accounts_receivable_and_cash.html', {'simulation_results': data})
+
+def simulate_accounts_payable_view(request, purchase_order_id):
+    data = simulate_update_accounts_payable(purchase_order_id)
+    return render(request, 'simulate_accounts_payable.html', {'simulation_results': data})
+
+def simulation_list_view(request):
+    invoices = Invoice.objects.all()
+    purchase_orders = PurchaseOrder.objects.all()
+    context = {
+        'invoices': invoices,
+        'purchase_orders': purchase_orders
+    }
+    return render(request, 'simulation_list.html', context)
